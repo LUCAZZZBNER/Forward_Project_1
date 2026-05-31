@@ -1,0 +1,1063 @@
+/* =============================================================
+   TechNova — 响应式导航栏
+   style.css  |  作者：前端开发实践 项目一
+   结构：
+     1. CSS 变量 & 主题
+     2. Reset & Base
+     3. Navbar 核心布局
+     4. Logo & SVG 动画
+     5. 导航菜单 & Hover 效果
+     6. 下拉菜单
+     7. 右侧操作区（主题切换、CTA、汉堡）
+     8. 汉堡菜单动画
+     9. 移动端抽屉式菜单
+    10. 主题：浅色模式
+    11. 滚动吸顶状态
+    12. 主内容区（演示 section）
+    13. 响应式媒体查询
+   ============================================================= */
+
+/* ============================================================
+   1. CSS 变量 & 主题（深色为默认）
+   ============================================================ */
+:root,
+[data-theme="dark"] {
+  /* 主色调 */
+  --bg:            #0a0c10;
+  --bg-nav:        rgba(10, 12, 16, 0.82);
+  --bg-nav-solid:  #0d0f14;
+  --bg-dropdown:   #13161e;
+  --bg-card:       #131720;
+  --bg-section-alt:#0f1118;
+  --surface:       #1a1e2a;
+
+  /* 文字 */
+  --text-primary:  #e8eaf0;
+  --text-secondary:#8a90a2;
+  --text-muted:    #555d74;
+
+  /* 强调色 */
+  --accent:        #4f8eff;
+  --accent-glow:   rgba(79, 142, 255, 0.25);
+  --accent-hover:  #6ba3ff;
+  --accent-active: #3a7aff;
+
+  /* 边框 */
+  --border:        rgba(255, 255, 255, 0.07);
+  --border-focus:  rgba(79, 142, 255, 0.5);
+
+  /* 阴影 */
+  --shadow-nav:    0 1px 0 var(--border), 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-dropdown: 0 16px 48px rgba(0, 0, 0, 0.5), 0 1px 0 var(--border);
+  --shadow-card:   0 4px 24px rgba(0,0,0,0.3);
+
+  /* 导航栏尺寸 */
+  --nav-height:    64px;
+  --nav-height-sm: 56px;
+
+  /* 过渡 */
+  --transition:    0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.18s ease;
+
+  /* 圆角 */
+  --radius:        10px;
+  --radius-sm:     6px;
+  --radius-pill:   999px;
+
+  /* 字体 */
+  --font-sans: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+[data-theme="light"] {
+  --bg:            #f5f7fa;
+  --bg-nav:        rgba(245, 247, 250, 0.88);
+  --bg-nav-solid:  #ffffff;
+  --bg-dropdown:   #ffffff;
+  --bg-card:       #ffffff;
+  --bg-section-alt:#eef1f6;
+  --surface:       #eaedf3;
+
+  --text-primary:  #0f1117;
+  --text-secondary:#4a5166;
+  --text-muted:    #9099b0;
+
+  --accent:        #2563eb;
+  --accent-glow:   rgba(37, 99, 235, 0.15);
+  --accent-hover:  #1d4ed8;
+  --accent-active: #1e40af;
+
+  --border:        rgba(0, 0, 0, 0.08);
+  --border-focus:  rgba(37, 99, 235, 0.4);
+
+  --shadow-nav:    0 1px 0 var(--border), 0 4px 24px rgba(0, 0, 0, 0.08);
+  --shadow-dropdown: 0 16px 48px rgba(0, 0, 0, 0.12), 0 1px 0 var(--border);
+  --shadow-card:   0 4px 24px rgba(0,0,0,0.07);
+}
+
+
+/* ============================================================
+   2. Reset & Base
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  transition: background-color var(--transition), color var(--transition);
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+/* Skip to content（无障碍） */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  z-index: 9999;
+}
+.skip-link:focus {
+  left: 1rem;
+}
+
+
+/* ============================================================
+   3. Navbar 核心布局
+   ============================================================ */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: var(--nav-height);
+  background: var(--bg-nav);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-nav);
+  transition:
+    background var(--transition),
+    box-shadow var(--transition),
+    height var(--transition);
+}
+
+.navbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  max-width: 1280px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* 滚动吸顶：加强背景不透明度 */
+.navbar.is-scrolled {
+  background: var(--bg-nav-solid);
+  box-shadow: 0 1px 0 var(--border), 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="light"] .navbar.is-scrolled {
+  box-shadow: 0 1px 0 var(--border), 0 6px 24px rgba(0, 0, 0, 0.1);
+}
+
+
+/* ============================================================
+   4. Logo & SVG 动画
+   ============================================================ */
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+  color: var(--text-primary);
+  transition: opacity var(--transition-fast);
+}
+
+.navbar__logo:hover {
+  opacity: 0.85;
+}
+
+.logo-svg {
+  width: 36px;
+  height: 36px;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+/* SVG Logo 动画 */
+.logo-ring {
+  stroke-dasharray: 126;
+  stroke-dashoffset: 126;
+  animation: ring-draw 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+  color: var(--accent);
+}
+
+.logo-tri {
+  opacity: 0;
+  transform: scale(0.5);
+  transform-origin: center;
+  animation: tri-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1s forwards;
+}
+
+.logo-dot {
+  opacity: 0;
+  animation: dot-fade 0.4s ease 1.3s forwards;
+}
+
+/* 悬停时 Logo 旋转 */
+.navbar__logo:hover .logo-svg {
+  animation: logo-spin 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes ring-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes tri-pop {
+  to { opacity: 0.85; transform: scale(1); }
+}
+@keyframes dot-fade {
+  to { opacity: 1; }
+}
+@keyframes logo-spin {
+  0%   { transform: rotate(0deg); }
+  50%  { transform: rotate(180deg) scale(1.1); }
+  100% { transform: rotate(360deg); }
+}
+
+.logo-text {
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.logo-text strong {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+
+/* ============================================================
+   5. 导航菜单 & Hover 效果（桌面端）
+   ============================================================ */
+.navbar__nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+/* 底部下划线动画 */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  right: 50%;
+  height: 2px;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  transition: left var(--transition), right var(--transition);
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background-color: var(--surface);
+}
+
+.nav-link:hover::after {
+  left: 0.85rem;
+  right: 0.85rem;
+}
+
+/* 激活状态 */
+.nav-link.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.nav-link.active::after {
+  left: 0.85rem;
+  right: 0.85rem;
+  background: var(--accent);
+}
+
+/* focus 可访问性 */
+.nav-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Chevron 图标 */
+.chevron {
+  width: 10px;
+  height: 10px;
+  transition: transform var(--transition-fast);
+  color: var(--text-muted);
+}
+
+.nav-item--dropdown:hover .chevron,
+.nav-item--dropdown:focus-within .chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+
+/* ============================================================
+   6. 下拉菜单（产品中心）
+   ============================================================ */
+.nav-item--dropdown {
+  position: relative;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  min-width: 160px;
+  background: var(--bg-dropdown);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-dropdown);
+  padding: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast),
+    visibility var(--transition-fast);
+  z-index: 1100;
+}
+
+/* 三角箭头 */
+.dropdown::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: var(--bg-dropdown);
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+}
+
+.nav-item--dropdown:hover .dropdown,
+.nav-item--dropdown:focus-within .dropdown {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.dropdown__link {
+  display: block;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.dropdown__link:hover {
+  color: var(--accent);
+  background-color: var(--surface);
+}
+
+
+/* ============================================================
+   7. 右侧操作区
+   ============================================================ */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+/* ---------- 主题切换按钮 ---------- */
+.theme-toggle {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.theme-toggle__icon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.theme-toggle__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* 深色模式下：显示太阳，隐藏月亮 */
+[data-theme="dark"] .theme-toggle__icon--sun {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+[data-theme="dark"] .theme-toggle__icon--moon {
+  opacity: 0;
+  transform: scale(0.5) rotate(-90deg);
+}
+
+/* 浅色模式下：显示月亮，隐藏太阳 */
+[data-theme="light"] .theme-toggle__icon--sun {
+  opacity: 0;
+  transform: scale(0.5) rotate(90deg);
+}
+[data-theme="light"] .theme-toggle__icon--moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+/* ---------- CTA 按钮 ---------- */
+.btn-cta {
+  padding: 0.48rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  transition:
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-cta:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.btn-cta:active {
+  transform: translateY(0);
+  background: var(--accent-active);
+}
+
+.btn-cta:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+   8. 汉堡菜单按钮 & 动画
+   ============================================================ */
+.menu-toggle {
+  display: none; /* 桌面端隐藏 */
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition: background-color var(--transition-fast);
+}
+
+.menu-toggle:hover {
+  background-color: var(--surface);
+}
+
+.menu-toggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.menu-toggle__bar {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transform-origin: center;
+  transition:
+    transform var(--transition),
+    opacity var(--transition),
+    width var(--transition);
+}
+
+/* 打开状态：变为 × */
+.menu-toggle.is-active .menu-toggle__bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.menu-toggle.is-active .menu-toggle__bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.menu-toggle.is-active .menu-toggle__bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+
+/* ============================================================
+   9. 移动端抽屉式菜单 & 遮罩
+   ============================================================ */
+/* 遮罩层 */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 900;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition), visibility var(--transition);
+}
+
+.nav-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+/* ============================================================
+   10. 浅色模式
+   ============================================================ */
+/* 变量已在 [data-theme="light"] 块中声明，body 和 navbar 通过
+   transition 自动平滑切换。 */
+
+
+/* ============================================================
+   11. 滚动吸顶（通过 JS 添加 .is-scrolled）
+   ============================================================ */
+/* 已在 .navbar.is-scrolled 中定义 */
+
+
+/* ============================================================
+   12. 主内容区（演示 section）
+   ============================================================ */
+
+/* 给固定导航腾空间 */
+body::before {
+  content: '';
+  display: block;
+  height: var(--nav-height);
+}
+
+/* ---------- 通用 Section ---------- */
+.section {
+  padding: 6rem 2rem;
+}
+
+.section:nth-child(even) {
+  background: var(--bg-section-alt);
+}
+
+.section__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.2rem;
+  color: var(--text-primary);
+}
+
+.section-desc {
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+/* ---------- Hero Section ---------- */
+.section--hero {
+  position: relative;
+  min-height: calc(100vh - var(--nav-height));
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--bg);
+  padding: 4rem 2rem;
+}
+
+.section--hero .section__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 0.3rem 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  margin-bottom: 1.5rem;
+  animation: fade-up 0.8s ease 0.1s both;
+}
+
+.hero-title {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  animation: fade-up 0.8s ease 0.2s both;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-desc {
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+  animation: fade-up 0.8s ease 0.3s both;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  animation: fade-up 0.8s ease 0.4s both;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid transparent;
+}
+.btn--primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 5px var(--accent-glow);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.btn--ghost:hover {
+  background: var(--surface);
+  border-color: var(--border-focus);
+  transform: translateY(-2px);
+}
+
+/* 网格装饰背景 */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ---------- 卡片网格 ---------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.card {
+  padding: 2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--border-focus);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--border-focus);
+}
+
+.card__icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.card p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ---------- 新闻列表 ---------- */
+.news-list {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.news-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.news-item:hover {
+  border-color: var(--border-focus);
+  background: var(--surface);
+}
+
+.news-date {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.news-link {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.news-link:hover {
+  color: var(--text-primary);
+}
+
+/* ---------- Contact ---------- */
+.section--contact {
+  text-align: center;
+}
+.section--contact .section__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.contact-info {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ---------- 入场动画 ---------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ============================================================
+   13. 响应式媒体查询
+   ============================================================ */
+
+/* ---- 平板端：768px ~ 1023px ---- */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .navbar__inner {
+    padding: 0 1.2rem;
+  }
+
+  .nav-link {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.65rem;
+  }
+
+  .btn-cta {
+    padding: 0.42rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---- 手机端：≤ 767px ---- */
+@media (max-width: 767px) {
+
+  :root {
+    --nav-height: var(--nav-height-sm);
+  }
+
+  /* 显示汉堡按钮，隐藏桌面 CTA */
+  .menu-toggle {
+    display: flex;
+  }
+
+  .btn-cta {
+    display: none;
+  }
+
+  /* ---------- 抽屉式移动菜单 ---------- */
+  .navbar__nav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(320px, 85vw);
+    background: var(--bg-nav-solid);
+    border-left: 1px solid var(--border);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.4);
+    z-index: 950;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: calc(var(--nav-height-sm) + 1rem) 1rem 2rem;
+    transform: translateX(100%);
+    transition: transform var(--transition);
+    overflow-y: auto;
+  }
+
+  .navbar__nav.is-open {
+    transform: translateX(0);
+  }
+
+  /* 移动端菜单列表：纵向 */
+  .nav-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .nav-item {
+    width: 100%;
+  }
+
+  .nav-link {
+    font-size: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    justify-content: space-between;
+  }
+
+  .nav-link::after {
+    display: none; /* 移动端不用下划线动画 */
+  }
+
+  .nav-link.active {
+    background: var(--surface);
+    color: var(--accent);
+  }
+
+  .nav-link:hover {
+    background: var(--surface);
+  }
+
+  /* 下拉菜单：移动端展开为静态列表 */
+  .nav-item--dropdown {
+    position: static;
+  }
+
+  .dropdown {
+    position: static;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 0 0 0 1rem;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    display: none; /* JS 控制展开 */
+    border-left: 2px solid var(--border);
+    margin: 0.25rem 0 0.25rem 1rem;
+  }
+
+  .dropdown::before {
+    display: none;
+  }
+
+  .dropdown.is-open {
+    display: block;
+  }
+
+  .dropdown__link {
+    font-size: 0.88rem;
+    padding: 0.6rem 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .chevron {
+    transition: transform var(--transition-fast);
+  }
+
+  .nav-link[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* 内容区调整 */
+  .section {
+    padding: 4rem 1.2rem;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+  }
+
+  .hero-desc br {
+    display: none;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .news-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
+
+/* ---- 大屏：≥ 1280px ---- */
+@media (min-width: 1280px) {
+  .nav-list {
+    gap: 0.5rem;
+  }
+}

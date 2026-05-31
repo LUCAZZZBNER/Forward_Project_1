@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="响应式导航栏演示" />
+  <title id="page-title">Loading...</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="navbar" id="navbar" role="banner">
+    <div class="navbar__inner">
+
+      <a href="#" class="navbar__logo" id="site-logo-link">
+        <svg class="logo-svg" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle class="logo-ring" cx="22" cy="22" r="20" stroke="currentColor" stroke-width="2"/>
+          <polygon class="logo-tri" points="22,8 36,34 8,34" fill="currentColor" opacity="0.85"/>
+          <circle class="logo-dot" cx="22" cy="22" r="4" fill="var(--accent)"/>
+        </svg>
+        <span class="logo-text" id="site-logo-text"></span>
+      </a>
+
+      <nav class="navbar__nav" id="nav-menu" role="navigation" aria-label="主导航">
+        <ul class="nav-list" id="dynamic-nav-list" role="list"></ul>
+      </nav>
+
+      <div class="navbar__actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="切换深色/浅色模式" title="切换主题">
+          <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          </span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+            </svg>
+          </span>
+        </button>
+
+        <a href="#" class="btn-cta" id="cta-button"></a>
+
+        <button class="menu-toggle" id="menu-toggle" aria-label="展开导航菜单" aria-expanded="false" aria-controls="nav-menu">
+          <span class="menu-toggle__bar"></span>
+          <span class="menu-toggle__bar"></span>
+          <span class="menu-toggle__bar"></span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <div class="nav-overlay" id="nav-overlay" aria-hidden="true"></div>
+
+  <main id="main-content">
+
+    <section class="section section--hero" id="hero">
+      <div class="section__inner">
+        <div class="hero-badge" id="hero-badge"></div>
+        <h1 class="hero-title" id="hero-title"></h1>
+        <p class="hero-desc" id="hero-desc"></p>
+        <div class="hero-actions">
+          <a href="#" class="btn btn--primary" id="hero-btn-primary"></a>
+          <a href="#" class="btn btn--ghost" id="hero-btn-ghost"></a>
+        </div>
+      </div>
+      <div class="hero-grid" aria-hidden="true"></div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="section__inner">
+        <h2 class="section-title" id="about-title"></h2>
+        <p class="section-desc" id="about-desc"></p>
+      </div>
+    </section>
+
+    <section class="section" id="products">
+      <div class="section__inner">
+        <h2 class="section-title" id="products-title"></h2>
+        <div class="card-grid" id="products-grid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="news">
+      <div class="section__inner">
+        <h2 class="section-title" id="news-title"></h2>
+        <ul class="news-list" id="news-list"></ul>
+      </div>
+    </section>
+
+    <section class="section section--contact" id="contact">
+      <div class="section__inner">
+        <h2 class="section-title" id="contact-title"></h2>
+        <p class="section-desc" id="contact-desc"></p>
+        <div class="contact-info" id="contact-info"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p id="footer-text"></p>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
